@@ -2,11 +2,13 @@
 
 " @DONE use async job
 " @DONE don't rerun on same line
-" @TODO don't run on empty line
+" @DONE don't run on empty line
 " @DONE new/modified line
 " @TODO don't run if not in git
 " @TODO find root if the git root is not CWD
-" @TODO enable/disable/airline etc
+" @TODO relative date
+" @DONE InsertEnter hide
+" @TODO tests
 
 let s:gitBlameNsId = nvim_create_namespace('git-blame-messages')
 
@@ -22,10 +24,16 @@ function! GitBlameIsDifferentBufferOrLine (buffer, line)
   endif
 endfunction
 
-function! GitBlameUpdateVirtualText (buffer, line)
+function! GitBlameUpdateVirtualTextIfDifferentLine (buffer, line) 
   let isDifferent = GitBlameIsDifferentBufferOrLine(a:buffer, a:line)
   if (isDifferent)
-    call GitBlameClearVirtualText(a:buffer)
+    call GitBlameUpdateVirtualText(a:buffer, a:line)
+  endif
+endfunction
+
+function! GitBlameUpdateVirtualText (buffer, line)
+  call GitBlameClearVirtualText(a:buffer)
+  if (strlen(getline(a:line)) > 0)
     let blameData = GitBlameData(a:buffer, a:line)
   endif
 endfunction
@@ -77,7 +85,9 @@ endfunction
 
 augroup blame
   autocmd!
-  autocmd CursorHold * call GitBlameUpdateVirtualText(bufnr("%"), line("."))
+  autocmd CursorHold * call GitBlameUpdateVirtualTextIfDifferentLine(bufnr("%"), line("."))
+  autocmd InsertLeave * call GitBlameUpdateVirtualText(bufnr("%"), line("."))
+  autocmd InsertEnter * call GitBlameClearVirtualText(bufnr("%"))
 augroup end
 
 
