@@ -16,17 +16,10 @@ let s:prevBuffer = ''
 let s:prevLine = ''
 let s:jobId = 0
 
-function! GitBlameIsDifferentBufferOrLine (buffer, line)
+function! GitBlameUpdateVirtualTextIfDifferentLine (buffer, line)
   if (a:line != s:prevLine || a:buffer != s:prevBuffer)
     let s:prevLine = a:line
     let s:prevBuffer = a:buffer
-    return 1
-  endif
-endfunction
-
-function! GitBlameUpdateVirtualTextIfDifferentLine (buffer, line) 
-  let isDifferent = GitBlameIsDifferentBufferOrLine(a:buffer, a:line)
-  if (isDifferent)
     call GitBlameUpdateVirtualText(a:buffer, a:line)
   endif
 endfunction
@@ -34,8 +27,8 @@ endfunction
 function! GitBlameUpdateVirtualText (buffer, line)
   call GitBlameClearVirtualText(a:buffer)
   if (strlen(getline(a:line)) > 0)
-    let blameData = GitBlameData(a:buffer, a:line)
-  endif
+   call GitBlameData(a:buffer, a:line)
+ endif
 endfunction
 
 function! GitBlameData (buffer, line)
@@ -53,7 +46,9 @@ endfunction
 
 function! GitBlameSetVirtualText(id, data, event)
   let s:jobId = 0
-  call nvim_buf_set_virtual_text(s:buffer, s:gitBlameNsId, s:line - 1, [[GitBlameComposeText(a:data), 'Noise']], [])
+  if (line('.') == s:line)
+    call nvim_buf_set_virtual_text(s:buffer, s:gitBlameNsId, s:line - 1, [[GitBlameComposeText(a:data), 'Noise']], [])
+  endif
 endfunction
 
 function! GitBlameComposeText(lines)
