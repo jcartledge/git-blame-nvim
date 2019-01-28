@@ -9,6 +9,7 @@
 " @TODO relative date
 " @DONE InsertEnter hide
 " @TODO tests
+" @TODO plugin structure, docs
 
 let s:gitBlameNsId = nvim_create_namespace('git-blame-messages')
 
@@ -40,11 +41,11 @@ function! GitBlameData (buffer, line)
   let blameCommand = "git blame -p -L" . a:line . "," . a:line . " " . bufname(a:buffer) 
   let s:jobId = jobstart(blameCommand, {
     \ 'stdout_buffered': 1,
-    \ 'on_stdout': function('GitBlameSetVirtualText')
+    \ 'on_stdout': function('s:GitBlameSetVirtualText')
     \ })
 endfunction
 
-function! GitBlameSetVirtualText(id, data, event)
+function! s:GitBlameSetVirtualText(id, data, event)
   let s:jobId = 0
   if (line('.') == s:line)
     call nvim_buf_set_virtual_text(s:buffer, s:gitBlameNsId, s:line - 1, [[GitBlameComposeText(a:data), 'Noise']], [])
@@ -81,8 +82,6 @@ endfunction
 augroup blame
   autocmd!
   autocmd CursorHold * call GitBlameUpdateVirtualTextIfDifferentLine(bufnr("%"), line("."))
-  autocmd InsertLeave * call GitBlameUpdateVirtualText(bufnr("%"), line("."))
-  autocmd InsertEnter * call GitBlameClearVirtualText(bufnr("%"))
+  autocmd InsertLeave,TextChanged,FocusGained,BufRead * call GitBlameUpdateVirtualText(bufnr("%"), line("."))
+  autocmd InsertEnter,FocusLost * call GitBlameClearVirtualText(bufnr("%"))
 augroup end
-
-
