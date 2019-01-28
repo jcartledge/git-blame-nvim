@@ -6,7 +6,7 @@
 " @DONE new/modified line
 " @TODO don't run if not in git
 " @TODO find root if the git root is not CWD
-" @TODO relative date
+" @DONE relative date
 " @DONE InsertEnter hide
 " @TODO tests
 " @TODO plugin structure, docs
@@ -67,7 +67,8 @@ function! GitBlameComposeText(lines)
     let text = printf("   %s", data.author)
   else
     try
-      let text = printf("   %s %s %s [%s]", data.hash, data.author, data['author-time'], data.summary)
+      let time = s:GitBlameRelativeTime(data['author-time'], localtime())
+      let text = printf("   %s | %s | %s | %s", data.author, time, data.summary, data.hash)
     catch /.*/
       let text = ''
     endtry
@@ -77,6 +78,34 @@ endfunction
 
 function! GitBlameClearVirtualText (buffer)
   call nvim_buf_clear_namespace(a:buffer, s:gitBlameNsId, 0, -1)
+endfunction
+
+function! s:GitBlameRelativeTime (then, now)
+  let seconds = str2nr(a:now) - str2nr(a:then)
+  let minutes = float2nr(floor(seconds / 60))
+  let hours = float2nr(floor(minutes / 60))
+  let days = float2nr(floor(hours / 24))
+  let weeks = float2nr(floor(days / 7))
+  let months = float2nr(floor(weeks / 4.5))
+  let years = float2nr(floor(weeks / 52))
+  if (years > 0)
+    let [time, unit] = [years, 'year']
+  elseif (months > 0)
+    let [time, unit] = [months, 'month']
+  elseif (weeks > 0)
+    let [time, unit] = [weeks, 'week']
+  elseif (days > 0)
+    let [time, unit] = [days, 'day']
+  elseif (hours > 0)
+    let [time, unit] = [hours, 'hour']
+  elseif (minutes > 0)
+    let [time, unit] = [minutes, 'minute']
+  elseif (seconds > 0)
+    let [time, unit] = [seconds, 'second']
+  else
+    return 'just now'
+  endif
+  return printf("%s %s%s ago", time, unit, time == 1 ? '' : 's')
 endfunction
 
 augroup blame
