@@ -1,0 +1,30 @@
+*git-blame-nvim* display git blame/annotate message for the current line.
+
+================================================================================
+CONTENTS                                                        *GitBlameContents*
+
+  1. Introduction     |GitBlameIntroduction|
+  2. Usage            |GitBlameUsage|
+  3. Functions        |GitBlameFunctions|
+
+================================================================================
+Section 1: Introduction                                     *GitBlameIntroduction*
+
+|git-blame-nvim| is a neovim plugin that displays git blame information for the
+current line as virtual text (see |nvim_buf_set_virtual_text()|).
+
+================================================================================
+Section 2: Usage                                                   *GitBlameUsage*
+
+The plugin will automatically be enabled for all buffers when it is installed.
+
+================================================================================
+Section 3: Functions                                           *GitBlameFunctions*
+
+*GitBlameEnable()*
+
+Enable git-blame-nvim for all buffers.
+
+*GitBlameDisable()*
+
+Disable git-blame-nvim for all buffers.

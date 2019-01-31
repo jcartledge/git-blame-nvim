@@ -9,8 +9,8 @@
 " @DONE relative date
 " @DONE InsertEnter hide
 " @TODO tests
-" @TODO plugin structure
-" @TODO, docs
+" @DONE plugin structure
+" @DONE docs
 " @TODO don't overwrite existing virtual text
 
 let s:gitBlameNsId = nvim_create_namespace('git-blame-messages')
