@@ -9,7 +9,9 @@
 " @DONE relative date
 " @DONE InsertEnter hide
 " @TODO tests
-" @TODO plugin structure, docs
+" @TODO plugin structure
+" @TODO, docs
+" @TODO don't overwrite existing virtual text
 
 let s:gitBlameNsId = nvim_create_namespace('git-blame-messages')
 
@@ -17,22 +19,22 @@ let s:prevBuffer = ''
 let s:prevLine = ''
 let s:jobId = 0
 
-function! GitBlameUpdateVirtualTextIfDifferentLine (buffer, line)
+function! s:GitBlameUpdateVirtualTextIfDifferentLine (buffer, line)
   if (a:line != s:prevLine || a:buffer != s:prevBuffer)
     let s:prevLine = a:line
     let s:prevBuffer = a:buffer
-    call GitBlameUpdateVirtualText(a:buffer, a:line)
+    call s:GitBlameUpdateVirtualText(a:buffer, a:line)
   endif
 endfunction
 
-function! GitBlameUpdateVirtualText (buffer, line)
-  call GitBlameClearVirtualText(a:buffer)
+function! s:GitBlameUpdateVirtualText (buffer, line)
+  call s:GitBlameClearVirtualText(a:buffer)
   if (strlen(getline(a:line)) > 0)
-   call GitBlameData(a:buffer, a:line)
+   call s:GitBlameData(a:buffer, a:line)
  endif
 endfunction
 
-function! GitBlameData (buffer, line)
+function! s:GitBlameData (buffer, line)
   if (s:jobId)
     call jobstop(s:jobId)
   endif
@@ -48,11 +50,11 @@ endfunction
 function! s:GitBlameSetVirtualText(id, data, event)
   let s:jobId = 0
   if (line('.') == s:line)
-    call nvim_buf_set_virtual_text(s:buffer, s:gitBlameNsId, s:line - 1, [[GitBlameComposeText(a:data), 'Noise']], [])
+    call nvim_buf_set_virtual_text(s:buffer, s:gitBlameNsId, s:line - 1, [[s:GitBlameComposeText(a:data), 'Noise']], [])
   endif
 endfunction
 
-function! GitBlameComposeText(lines)
+function! s:GitBlameComposeText(lines)
   if (len('a:lines') < 2)
     return
   endif
@@ -76,7 +78,7 @@ function! GitBlameComposeText(lines)
   return text
 endfunction
 
-function! GitBlameClearVirtualText (buffer)
+function! s:GitBlameClearVirtualText (buffer)
   call nvim_buf_clear_namespace(a:buffer, s:gitBlameNsId, 0, -1)
 endfunction
 
@@ -108,9 +110,23 @@ function! s:GitBlameRelativeTime (then, now)
   return printf("%s %s%s ago", time, unit, time == 1 ? '' : 's')
 endfunction
 
-augroup blame
+function! GitBlameEnable()
+  augroup git_blame_nvim
+    autocmd!
+    autocmd CursorHold * call s:GitBlameUpdateVirtualTextIfDifferentLine(bufnr("%"), line("."))
+    autocmd InsertLeave,TextChanged,FocusGained,BufRead * call s:GitBlameUpdateVirtualText(bufnr("%"), line("."))
+    autocmd InsertEnter,FocusLost * call s:GitBlameClearVirtualText(bufnr("%"))
+  augroup end
+endfunction
+
+function! GitBlameDisable()
+  call s:GitBlameClearVirtualText(bufnr("%"))
+  augroup git_blame_nvim
+    autocmd!
+  augroup end
+endfunction
+
+augroup git_blame_nvim_init
   autocmd!
-  autocmd CursorHold * call GitBlameUpdateVirtualTextIfDifferentLine(bufnr("%"), line("."))
-  autocmd InsertLeave,TextChanged,FocusGained,BufRead * call GitBlameUpdateVirtualText(bufnr("%"), line("."))
-  autocmd InsertEnter,FocusLost * call GitBlameClearVirtualText(bufnr("%"))
+  autocmd VimEnter * call GitBlameEnable()
 augroup end
