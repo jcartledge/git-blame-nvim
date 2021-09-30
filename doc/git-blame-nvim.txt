@@ -28,11 +28,19 @@ Section 3: Functions                                           *GitBlameFunction
 *GitBlameEnable()*
 
 Enable git-blame-nvim for all buffers.
+    >
+    :call GitBlameEnable()
+
 
 *GitBlameDisable()*
 
 Disable git-blame-nvim for all buffers.
+    >
+    :call GitBlameDisable()
+
 
 *GitBlameToggle()*
 
 Toggle to enable/disable git-blame-nvim for all buffers.
+    >
+    :call GitBlameToggle()
