@@ -12,7 +12,9 @@
 " @DONE plugin structure
 " @DONE docs
 " @TODO don't overwrite existing virtual text
+" @TODO allow user to customize colors
 
+let g:git_blame_enabled = 1
 let s:gitBlameNsId = nvim_create_namespace('git-blame-messages')
 
 let s:prevBuffer = ''
@@ -117,6 +119,7 @@ function! GitBlameEnable()
     autocmd InsertLeave,TextChanged,FocusGained,BufRead * call s:GitBlameUpdateVirtualText(bufnr("%"), line("."))
     autocmd InsertEnter,FocusLost * call s:GitBlameClearVirtualText(bufnr("%"))
   augroup end
+  let g:git_blame_enabled = 1
 endfunction
 
 function! GitBlameDisable()
@@ -124,9 +127,10 @@ function! GitBlameDisable()
   augroup git_blame_nvim
     autocmd!
   augroup end
+  let g:git_blame_enabled = 0
 endfunction
 
 augroup git_blame_nvim_init
   autocmd!
-  autocmd VimEnter * call GitBlameEnable()
+  autocmd VimEnter * if g:git_blame_enabled == 1 | call GitBlameEnable() |endif
 augroup end
