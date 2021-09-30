@@ -130,6 +130,14 @@ function! GitBlameDisable()
   let g:git_blame_enabled = 0
 endfunction
 
+function! GitBlameToggle()
+    if g:git_blame_enabled == 0
+        call GitBlameEnable()
+    else
+        call GitBlameDisable()
+    endif
+endfunction
+
 augroup git_blame_nvim_init
   autocmd!
   autocmd VimEnter * if g:git_blame_enabled == 1 | call GitBlameEnable() |endif
