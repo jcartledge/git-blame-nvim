@@ -14,7 +14,7 @@
 " @TODO don't overwrite existing virtual text
 " @TODO allow user to customize colors
 
-let g:git_blame_enabled = 1
+let g:git_blame_enabled = get(g:, 'git_blame_enabled', 1)
 let s:gitBlameNsId = nvim_create_namespace('git-blame-messages')
 
 let s:prevBuffer = ''
