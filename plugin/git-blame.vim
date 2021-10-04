@@ -12,7 +12,7 @@
 " @DONE plugin structure
 " @DONE docs
 " @TODO don't overwrite existing virtual text
-" @TODO allow user to customize colors
+" @DONE allow user to customize colors
 
 let g:git_blame_enabled = get(g:, 'git_blame_enabled', 1)
 let s:gitBlameNsId = nvim_create_namespace('git-blame-messages')
@@ -20,6 +20,9 @@ let s:gitBlameNsId = nvim_create_namespace('git-blame-messages')
 let s:prevBuffer = ''
 let s:prevLine = ''
 let s:jobId = 0
+
+highlight! GitBlameTextStyle ctermfg=7
+
 
 function! s:GitBlameUpdateVirtualTextIfDifferentLine (buffer, line)
   if (a:line != s:prevLine || a:buffer != s:prevBuffer)
@@ -52,7 +55,7 @@ endfunction
 function! s:GitBlameSetVirtualText(id, data, event)
   let s:jobId = 0
   if (line('.') == s:line)
-    call nvim_buf_set_virtual_text(s:buffer, s:gitBlameNsId, s:line - 1, [[s:GitBlameComposeText(a:data), 'Noise']], [])
+    call nvim_buf_set_virtual_text(s:buffer, s:gitBlameNsId, s:line - 1, [[s:GitBlameComposeText(a:data), 'GitBlameTextStyle']], [])
   endif
 endfunction
 
