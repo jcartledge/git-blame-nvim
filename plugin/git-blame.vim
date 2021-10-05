@@ -55,7 +55,9 @@ endfunction
 function! s:GitBlameSetVirtualText(id, data, event)
   let s:jobId = 0
   if (line('.') == s:line)
-    call nvim_buf_set_virtual_text(s:buffer, s:gitBlameNsId, s:line - 1, [[s:GitBlameComposeText(a:data), 'GitBlameTextStyle']], [])
+    try
+        call nvim_buf_set_virtual_text(s:buffer, s:gitBlameNsId, s:line - 1, [[s:GitBlameComposeText(a:data), 'GitBlameTextStyle']], [])
+    endtry
   endif
 endfunction
 
