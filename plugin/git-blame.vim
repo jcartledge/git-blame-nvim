@@ -24,7 +24,7 @@ let s:jobId = 0
 highlight! GitBlameTextStyle ctermfg=7
 
 
-function! s:GitBlameUpdateVirtualTextIfDifferentLine (buffer, line)
+function! s:GitBlameUpdateVirtualTextIfDifferentLine (buffer, line) abort
   if (a:line != s:prevLine || a:buffer != s:prevBuffer)
     let s:prevLine = a:line
     let s:prevBuffer = a:buffer
@@ -32,14 +32,14 @@ function! s:GitBlameUpdateVirtualTextIfDifferentLine (buffer, line)
   endif
 endfunction
 
-function! s:GitBlameUpdateVirtualText (buffer, line)
+function! s:GitBlameUpdateVirtualText (buffer, line) abort
   call s:GitBlameClearVirtualText(a:buffer)
   if (strlen(getline(a:line)) > 0)
    call s:GitBlameData(a:buffer, a:line)
  endif
 endfunction
 
-function! s:GitBlameData (buffer, line)
+function! s:GitBlameData (buffer, line) abort
   if (s:jobId)
     call jobstop(s:jobId)
   endif
@@ -52,7 +52,7 @@ function! s:GitBlameData (buffer, line)
     \ })
 endfunction
 
-function! s:GitBlameSetVirtualText(id, data, event)
+function! s:GitBlameSetVirtualText(id, data, event) abort
   let s:jobId = 0
   if (line('.') == s:line)
     try
@@ -61,7 +61,7 @@ function! s:GitBlameSetVirtualText(id, data, event)
   endif
 endfunction
 
-function! s:GitBlameComposeText(lines)
+function! s:GitBlameComposeText(lines) abort
   if (len('a:lines') < 2)
     return
   endif
@@ -85,11 +85,11 @@ function! s:GitBlameComposeText(lines)
   return text
 endfunction
 
-function! s:GitBlameClearVirtualText (buffer)
+function! s:GitBlameClearVirtualText (buffer) abort
   call nvim_buf_clear_namespace(a:buffer, s:gitBlameNsId, 0, -1)
 endfunction
 
-function! s:GitBlameRelativeTime (then, now)
+function! s:GitBlameRelativeTime (then, now) abort
   let seconds = str2nr(a:now) - str2nr(a:then)
   let minutes = float2nr(floor(seconds / 60))
   let hours = float2nr(floor(minutes / 60))
@@ -117,7 +117,7 @@ function! s:GitBlameRelativeTime (then, now)
   return printf("%s %s%s ago", time, unit, time == 1 ? '' : 's')
 endfunction
 
-function! GitBlameEnable()
+function! GitBlameEnable() abort
   augroup git_blame_nvim
     autocmd!
     autocmd CursorHold * call s:GitBlameUpdateVirtualTextIfDifferentLine(bufnr("%"), line("."))
@@ -127,7 +127,7 @@ function! GitBlameEnable()
   let g:git_blame_enabled = 1
 endfunction
 
-function! GitBlameDisable()
+function! GitBlameDisable() abort
   call s:GitBlameClearVirtualText(bufnr("%"))
   augroup git_blame_nvim
     autocmd!
@@ -135,7 +135,7 @@ function! GitBlameDisable()
   let g:git_blame_enabled = 0
 endfunction
 
-function! GitBlameToggle()
+function! GitBlameToggle() abort
     if g:git_blame_enabled == 0
         call GitBlameEnable()
     else
