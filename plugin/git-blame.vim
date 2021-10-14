@@ -35,11 +35,7 @@ endfunction
 function! s:GitBlameUpdateVirtualText (buffer, line)
     call s:GitBlameClearVirtualText(a:buffer)
     if (strlen(getline(a:line)) > 0)
-        try
-            call s:GitBlameData(a:buffer, a:line)
-        catch /.*/
-            silent echo ''
-        endtry
+        call s:GitBlameData(a:buffer, a:line)
     endif
 endfunction
 
@@ -59,7 +55,12 @@ endfunction
 function! s:GitBlameSetVirtualText(id, data, event)
     let s:jobId = 0
     if (line('.') == s:line)
-        call nvim_buf_set_virtual_text(s:buffer, s:gitBlameNsId, s:line - 1, [[s:GitBlameComposeText(a:data), 'GitBlameTextStyle']], [])
+        try
+            let blame = s:GitBlameComposeText(a:data)
+        catch /.*/
+            let blame = ''
+        endtry
+        call nvim_buf_set_virtual_text(s:buffer, s:gitBlameNsId, s:line - 1, [[blame, 'GitBlameTextStyle']], [])
     endif
 endfunction
 
@@ -74,17 +75,18 @@ function! s:GitBlameComposeText(lines)
             let data[key] = join(val)
         endif
     endfor
+    " return '    SOLOMON XIE | TODAY | TEST | 6a3b21a'
     if data.hash == '0000000'
         let s:text = printf("   %s", data.author)
     else
         try
             let time = s:GitBlameRelativeTime(data['author-time'], localtime())
-            let s:text = printf("   %s | %s | %s | %s", data.author, time, data.summary, data.hash)
+            let text = printf("   %s | %s | %s | %s", data.author, time, data.summary, data.hash)
         catch /.*/
-            let s:text = ''
+            let text = ''
         endtry
     endif
-    return s:text
+    return text
 endfunction
 
 function! s:GitBlameClearVirtualText (buffer)
