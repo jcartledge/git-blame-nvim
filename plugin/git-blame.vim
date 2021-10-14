@@ -37,6 +37,8 @@ function! s:GitBlameUpdateVirtualText (buffer, line)
     if (strlen(getline(a:line)) > 0)
         try
             call s:GitBlameData(a:buffer, a:line)
+        catch /.*/
+            silent echo ''
         endtry
     endif
 endfunction
@@ -73,16 +75,16 @@ function! s:GitBlameComposeText(lines)
         endif
     endfor
     if data.hash == '0000000'
-        let text = printf("   %s", data.author)
+        let s:text = printf("   %s", data.author)
     else
         try
             let time = s:GitBlameRelativeTime(data['author-time'], localtime())
-            let text = printf("   %s | %s | %s | %s", data.author, time, data.summary, data.hash)
+            let s:text = printf("   %s | %s | %s | %s", data.author, time, data.summary, data.hash)
         catch /.*/
-            let text = ''
+            let s:text = ''
         endtry
     endif
-    return text
+    return s:text
 endfunction
 
 function! s:GitBlameClearVirtualText (buffer)
